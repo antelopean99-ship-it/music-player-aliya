@@ -1,0 +1,12 @@
+{
+  "display_name": "小兔播放器",
+  "loading_order": 100,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "Aliya Lee",
+  "version": "1.0.1",
+  "homePage": "https://github.com/antelopean99-ship-it/music-player-Jazlyn",
+  "auto_update": true
+}

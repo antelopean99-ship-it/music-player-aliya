@@ -1,0 +1,2032 @@
+
+#bear_music_wrap_v13 {
+    position: fixed;
+    z-index: 2147483647;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    contain: layout paint;
+    isolation: isolate;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#bear_music_wrap_v13 * {
+    box-sizing: border-box;
+    outline: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 悬浮球：故意使用和原“小猫音乐家”相同的 absolute 定位思路 */
+#bear_music_wrap_v13 .bear_orb {
+    position: absolute;
+    right: 32px;
+    bottom: 175px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    pointer-events: auto;
+    touch-action: none;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid rgba(168, 205, 174, .78);
+    background: rgba(31, 48, 39, .96);
+    box-shadow:
+        0 0 10px rgba(160, 216, 170, .42),
+        0 7px 24px rgba(0,0,0,.35);
+    z-index: 20;
+}
+
+#bear_music_wrap_v13 .bear_orb:active {
+    cursor: grabbing;
+    transform: scale(.94);
+}
+
+#bear_music_wrap_v13 .bear_orb img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+/* 播放音乐时，小熊图片缓慢顺时针旋转；暂停/停止时立即停下 */
+#bear_music_wrap_v13 .bear_orb.playing .bear_photo {
+    animation: bear_orb_slow_spin_v13 9s linear infinite;
+    transform-origin: 50% 50%;
+}
+
+@keyframes bear_orb_slow_spin_v13 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+#bear_music_wrap_v13 .bear_default {
+    font-size: 30px;
+    line-height: 1;
+}
+
+/* 遮罩 */
+#bear_music_wrap_v13 .bear_mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.22);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+}
+
+/* 主面板 */
+#bear_music_wrap_v13 .bear_panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% + 14px)) scale(.94);
+    opacity: 0;
+    pointer-events: none;
+
+    width: min(370px, calc(100vw - 32px));
+    height: min(570px, calc(100vh - 100px));
+
+    background: rgba(29, 45, 37, .93);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+
+    border: 1.5px solid rgba(166, 204, 173, .38);
+    border-radius: 27px;
+
+    box-shadow: 0 30px 80px rgba(0,0,0,.38);
+
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+
+    color: #eaf0eb;
+    z-index: 10;
+
+    transition:
+        opacity .34s ease,
+        transform .42s cubic-bezier(.16,1,.3,1);
+    will-change: transform, opacity;
+}
+
+#bear_music_wrap_v13 .bear_panel.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+#bear_music_wrap_v13 .bear_close {
+    position: absolute;
+    top: 9px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,.10);
+    color: rgba(225,235,227,.62);
+    font-size: 23px;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 30;
+}
+
+#bear_music_wrap_v13 .bear_title {
+    text-align: center;
+    margin: 2px 35px 13px;
+    color: rgba(224,237,226,.86);
+    font-size: 15px;
+    letter-spacing: .12em;
+}
+
+#bear_music_wrap_v13 .bear_tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(194,219,199,.11);
+    margin-bottom: 13px;
+}
+
+#bear_music_wrap_v13 .bear_tab {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    padding: 8px 2px 12px;
+    border: 0;
+    background: transparent;
+    color: rgba(215,226,217,.45);
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+#bear_music_wrap_v13 .bear_tab.active {
+    color: rgba(230,239,231,.92);
+}
+
+#bear_music_wrap_v13 .bear_tab.active::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -3px;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #a7c9ae;
+    box-shadow: 0 0 8px rgba(167,201,174,.55);
+}
+
+#bear_music_wrap_v13 .bear_content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 3px 2px 4px;
+}
+
+/* 简介页：卡片直接贴近栏目栏下方，避免顶部出现大块空白。
+ * 仅作用于简介页，不影响音乐/地点/南京等栏目。
+ */
+#bear_music_wrap_v13 .bear_content.bear_intro_content {
+    padding-top: 13px !important;
+}
+
+#bear_music_wrap_v13 .bear_text {
+    padding: 5px 7px 18px;
+    color: rgba(222,231,223,.77);
+    white-space: pre-wrap;
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+#bear_music_wrap_v13 .bear_card {
+    padding: 14px 15px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(193,219,199,.09);
+    background: rgba(116,145,123,.075);
+}
+
+#bear_music_wrap_v13 .bear_card_title {
+    color: rgba(199,220,203,.78);
+    font-size: 14px;
+    margin-bottom: 7px;
+}
+
+#bear_music_wrap_v13 .bear_card_text {
+    color: rgba(213,225,215,.56);
+    font-size: 12px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+/* 播放器 */
+#bear_music_wrap_v13 .bear_player {
+    padding: 14px 14px 12px;
+    margin-bottom: 10px;
+    border-radius: 17px;
+    border: 1px solid rgba(193,219,199,.10);
+    background: rgba(115,143,122,.065);
+}
+
+#bear_music_wrap_v13 .bear_now {
+    text-align: center;
+    min-height: 19px;
+    color: rgba(227,236,228,.83);
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+#bear_music_wrap_v13 .bear_sub {
+    margin-top: 4px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: rgba(212,224,214,.40);
+    font-size: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* 播放模式：低存在感的小按钮，融入播放器原有深绿色界面 */
+#bear_music_wrap_v13 .bear_mode_row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 10px 0 -1px;
+    padding-top: 1px;
+}
+
+#bear_music_wrap_v13 .bear_mode_btn {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 58px;
+    height: 26px;
+    padding: 0 9px;
+    border: 1px solid rgba(194,219,200,.10) !important;
+    border-radius: 9px !important;
+    background: rgba(45,61,50,.24) !important;
+    background-image: none !important;
+    color: rgba(194,216,198,.56) !important;
+    box-shadow: none !important;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: .1px;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+#bear_music_wrap_v13 .bear_mode_btn .bear_mode_icon {
+    color: rgba(168,204,176,.78);
+    font-size: 12px;
+    line-height: 1;
+}
+
+#bear_music_wrap_v13 .bear_mode_btn:hover,
+#bear_music_wrap_v13 .bear_mode_btn:active,
+#bear_music_wrap_v13 .bear_mode_btn:focus {
+    background: rgba(72,94,78,.34) !important;
+    background-image: none !important;
+    border-color: rgba(194,219,200,.18) !important;
+    color: rgba(220,231,221,.78) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#bear_music_wrap_v13 .bear_controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 17px;
+    margin: 4px 0 11px;
+}
+
+#bear_music_wrap_v13 .bear_btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    border: 1px solid rgba(194,219,200,.15);
+    background: rgba(25,40,33,.36);
+    color: #d5af7f;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+#bear_music_wrap_v13 .bear_btn.play {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(93,121,101,.60);
+}
+
+#bear_music_wrap_v13 .bear_progress {
+    width: 100%;
+    height: 4px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(208,225,211,.12);
+    border-radius: 5px;
+}
+
+#bear_music_wrap_v13 .bear_progress::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 0;
+    background: #a8c9ae;
+}
+
+#bear_music_wrap_v13 .bear_time {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    color: rgba(209,221,211,.38);
+    font-size: 10px;
+}
+
+/* 音乐页底部操作栏：直接放进播放器气泡内部，左添加 / 右循环 */
+#bear_music_wrap_v13 .bear_music_action_row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100%;
+    min-height: 30px;
+    gap: 12px;
+    margin: 13px 0 0 !important;
+    padding: 0 1px;
+}
+
+#bear_music_wrap_v13 .bear_music_action_row > .bear_music_add_row,
+#bear_music_wrap_v13 .bear_music_action_row > .bear_mode_btn {
+    flex: 0 0 76px;
+    width: 76px;
+}
+
+#bear_music_wrap_v13 .bear_music_add_row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+}
+
+#bear_music_wrap_v13 .bear_music_add_btn {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px;
+    min-width: 76px;
+    width: 76px;
+    height: 30px;
+    padding: 0 9px;
+    border: 1px solid rgba(194,219,200,.10) !important;
+    border-radius: 10px !important;
+    background: rgba(65,83,71,.20) !important;
+    background-image: none !important;
+    color: rgba(203,221,206,.54) !important;
+    box-shadow: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transform: none !important;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+#bear_music_wrap_v13 .bear_music_add_btn .bear_add_icon {
+    color: rgba(170,205,177,.76);
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* 长按管理提示：独立于播放器气泡，放在播放器与歌曲列表之间的留白中。 */
+#bear_music_wrap_v13 .bear_music_manage_hint {
+    width: 100%;
+    height: 17px;
+    margin: -12px 0 9px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(198,216,201,.27);
+    font-size: 9px;
+    line-height: 17px;
+    letter-spacing: .04em;
+    pointer-events: none;
+}
+
+#bear_music_wrap_v13 .bear_music_add_btn:hover,
+#bear_music_wrap_v13 .bear_music_add_btn:active,
+#bear_music_wrap_v13 .bear_music_add_btn:focus {
+    background: rgba(86,112,93,.28) !important;
+    background-image: none !important;
+    border-color: rgba(194,219,200,.18) !important;
+    color: rgba(226,237,227,.82) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* 长按歌曲后弹出的管理菜单 */
+#bear_music_wrap_v13 .bear_track_action_dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background: rgba(11,18,14,.34);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    pointer-events: auto;
+}
+
+#bear_music_wrap_v13 .bear_track_action_card {
+    width: min(280px, calc(100vw - 52px));
+    padding: 18px 15px 14px;
+    border: 1px solid rgba(194,219,200,.14);
+    border-radius: 18px;
+    background: rgba(31,48,39,.985);
+    box-shadow: 0 20px 55px rgba(0,0,0,.38);
+}
+
+#bear_music_wrap_v13 .bear_track_action_title {
+    margin: 0 4px 4px;
+    color: rgba(226,237,228,.88);
+    font-size: 13px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#bear_music_wrap_v13 .bear_track_action_hint {
+    margin: 0 4px 13px;
+    color: rgba(194,214,198,.34);
+    font-size: 9px;
+    text-align: center;
+}
+
+#bear_music_wrap_v13 .bear_track_action_options {
+    display: flex;
+    gap: 7px;
+}
+
+#bear_music_wrap_v13 .bear_track_action_option {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    flex: 1;
+    height: 34px;
+    border-radius: 10px !important;
+    border: 1px solid rgba(194,219,200,.09) !important;
+    background: rgba(45,61,50,.25) !important;
+    background-image: none !important;
+    color: rgba(216,229,218,.68) !important;
+    box-shadow: none !important;
+    font-size: 10px !important;
+    line-height: 34px;
+    cursor: pointer;
+}
+
+#bear_music_wrap_v13 .bear_track_action_option.delete {
+    border-color: rgba(164,112,103,.14) !important;
+    background: rgba(115,76,68,.26) !important;
+    color: rgba(239,218,213,.68) !important;
+}
+
+#bear_music_wrap_v13 .bear_track_action_option.cancel {
+    color: rgba(198,217,201,.45) !important;
+}
+
+#bear_music_wrap_v13 .bear_track_action_option:hover,
+#bear_music_wrap_v13 .bear_track_action_option:active,
+#bear_music_wrap_v13 .bear_track_action_option:focus {
+    box-shadow: none !important;
+    transform: none !important;
+    background-image: none !important;
+}
+
+/* 隐藏歌曲仍留在原来的排序位置，只把整行压暗；不再挪到列表底部。 */
+#bear_music_wrap_v13 .bear_track_shell {
+    position: relative;
+    width: 100%;
+    margin-bottom: 7px;
+    overflow: hidden;
+    border-radius: 13px;
+    touch-action: pan-y;
+}
+
+#bear_music_wrap_v13 .bear_track_shell_hidden {
+    opacity: .58;
+}
+
+#bear_music_wrap_v13 .bear_track_hidden {
+    background: rgba(76,94,81,.025) !important;
+    border-color: rgba(194,219,200,.035) !important;
+}
+
+#bear_music_wrap_v13 .bear_track_hidden .bear_no,
+#bear_music_wrap_v13 .bear_track_hidden .bear_track_name {
+    color: rgba(204,218,207,.36) !important;
+}
+
+#bear_music_wrap_v13 .bear_track_hidden .bear_track_sub {
+    color: rgba(191,207,194,.22) !important;
+}
+
+/* 添加音乐弹窗 */
+#bear_music_wrap_v13 .bear_music_dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(11,18,14,.42);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    pointer-events: auto;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_card {
+    width: min(330px, calc(100vw - 42px));
+    padding: 20px 18px 16px;
+    border: 1px solid rgba(194,219,200,.15);
+    border-radius: 19px;
+    background: rgba(31,48,39,.985);
+    box-shadow: 0 20px 55px rgba(0,0,0,.38);
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_title {
+    margin: 0 2px 5px;
+    color: rgba(226,237,228,.90);
+    font-size: 15px;
+    letter-spacing: .04em;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_hint {
+    margin: 0 2px 14px;
+    color: rgba(194,214,198,.40);
+    font-size: 9px;
+    line-height: 1.55;
+}
+
+#bear_music_wrap_v13 .bear_music_field {
+    margin-bottom: 10px;
+}
+
+#bear_music_wrap_v13 .bear_music_field_label {
+    display: block;
+    margin: 0 2px 5px;
+    color: rgba(205,223,208,.58);
+    font-size: 10px;
+}
+
+#bear_music_wrap_v13 .bear_music_input {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 100%;
+    height: 38px;
+    padding: 0 11px;
+    border: 1px solid rgba(194,219,200,.11) !important;
+    border-radius: 11px !important;
+    outline: none !important;
+    background: rgba(18,32,25,.52) !important;
+    background-image: none !important;
+    color: rgba(231,239,232,.88) !important;
+    box-shadow: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    font-size: 11px !important;
+    line-height: 38px;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
+#bear_music_wrap_v13 .bear_music_input::placeholder {
+    color: rgba(194,214,198,.28);
+}
+
+#bear_music_wrap_v13 .bear_music_input:focus {
+    border-color: rgba(169,205,176,.28) !important;
+    background: rgba(22,38,29,.66) !important;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_btn {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    height: 32px;
+    min-width: 64px;
+    padding: 0 12px;
+    border-radius: 10px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    font-size: 10px !important;
+    line-height: 32px;
+    cursor: pointer;
+    transform: none !important;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_cancel {
+    border: 1px solid rgba(194,219,200,.09) !important;
+    background: rgba(45,61,50,.24) !important;
+    background-image: none !important;
+    color: rgba(198,217,201,.52) !important;
+    box-shadow: none !important;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_confirm {
+    border: 1px solid rgba(165,202,173,.20) !important;
+    background: rgba(101,139,109,.34) !important;
+    background-image: none !important;
+    color: rgba(226,238,228,.82) !important;
+    box-shadow: none !important;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_cancel:hover,
+#bear_music_wrap_v13 .bear_music_dialog_cancel:active,
+#bear_music_wrap_v13 .bear_music_dialog_cancel:focus {
+    background: rgba(62,81,67,.34) !important;
+    color: rgba(221,232,222,.76) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#bear_music_wrap_v13 .bear_music_dialog_confirm:hover,
+#bear_music_wrap_v13 .bear_music_dialog_confirm:active,
+#bear_music_wrap_v13 .bear_music_dialog_confirm:focus {
+    background: rgba(112,153,121,.42) !important;
+    border-color: rgba(178,211,184,.28) !important;
+    color: rgba(235,243,236,.92) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+
+#bear_music_wrap_v13 .bear_track {
+    width: 100%;
+    min-height: 50px;
+    margin-bottom: 7px;
+    padding: 0 13px;
+    border-radius: 13px;
+    border: 1px solid rgba(194,219,200,.065);
+    background: rgba(113,141,120,.045);
+    color: rgba(219,228,220,.66);
+    display: flex;
+    align-items: center;
+    text-align: left;
+    cursor: pointer;
+}
+
+#bear_music_wrap_v13 .bear_track.active {
+    background: rgba(135,166,143,.13);
+    border-color: rgba(169,205,176,.16);
+    color: rgba(229,238,230,.92);
+}
+
+#bear_music_wrap_v13 .bear_no {
+    width: 27px;
+    flex: 0 0 27px;
+    color: rgba(208,177,138,.55);
+    font-size: 10px;
+}
+
+#bear_music_wrap_v13 .bear_track_main {
+    min-width: 0;
+    flex: 1;
+}
+
+#bear_music_wrap_v13 .bear_track_name {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 13px;
+}
+
+#bear_music_wrap_v13 .bear_track_sub {
+    display: block;
+    margin-top: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: rgba(214,225,216,.34);
+    font-size: 10px;
+}
+
+#bear_music_wrap_v13 .bear_hint {
+    position: fixed;
+    left: 50%;
+    bottom: 85px;
+    transform: translateX(-50%);
+    z-index: 2147483647;
+    padding: 9px 13px;
+    border-radius: 12px;
+    background: rgba(29,43,37,.96);
+    border: 1px solid rgba(200,225,207,.13);
+    color: rgba(232,240,233,.90);
+    font-size: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .bear_panel {
+        width: calc(100vw - 28px);
+        height: min(570px, calc(100vh - 90px));
+        border-radius: 25px;
+        padding: 17px;
+    }
+
+    #bear_music_wrap_v13 .bear_tab {
+        font-size: 12px;
+    }
+}
+
+/* ===== screenshot-matched visual refinement ===== */
+#bear_music_wrap_v13 .bear_panel {
+    width: min(590px, calc(100vw - 24px));
+    height: min(860px, calc(100vh - 72px));
+    padding: 0 0 18px;
+    background: rgba(29, 44, 36, .965);
+    border: 1px solid rgba(177, 204, 184, .22);
+    border-radius: 30px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.44);
+    overflow: hidden;
+}
+
+#bear_music_wrap_v13 .bear_tabs {
+    flex: 0 0 auto;
+    margin: 0 34px 0;
+    padding-top: 24px;
+    border-bottom: 1px solid rgba(196,220,200,.13);
+}
+
+#bear_music_wrap_v13 .bear_tab {
+    padding: 0 2px 16px;
+    font-size: 17px;
+    color: rgba(218,228,219,.48);
+}
+
+#bear_music_wrap_v13 .bear_tab.active {
+    color: rgba(222,234,223,.86);
+}
+
+#bear_music_wrap_v13 .bear_tab.active::after {
+    bottom: -3px;
+    width: 7px;
+    height: 7px;
+    background: #9fc2a5;
+    box-shadow: 0 0 7px rgba(159,194,165,.55);
+}
+
+#bear_music_wrap_v13 .bear_content {
+    padding: 28px 34px 36px;
+    scrollbar-width: none;
+}
+
+#bear_music_wrap_v13 .bear_content::-webkit-scrollbar {
+    display: none;
+}
+
+#bear_music_wrap_v13 .bear_card {
+    padding: 23px 24px 24px;
+    margin-bottom: 20px;
+    border-radius: 23px;
+    border: 1px solid rgba(194,218,199,.12);
+    background: rgba(65, 83, 71, .38);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.018),
+        0 1px 1px rgba(0,0,0,.05);
+}
+
+#bear_music_wrap_v13 .bear_card_title {
+    padding-bottom: 13px;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed rgba(203,224,207,.18);
+    color: rgba(181,211,187,.82);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+#bear_music_wrap_v13 .bear_tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 14px;
+}
+
+#bear_music_wrap_v13 .bear_tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 3px 11px;
+    border-radius: 8px;
+    background: rgba(111,135,118,.25);
+    color: rgba(201,216,204,.55);
+    font-size: 13px;
+}
+
+#bear_music_wrap_v13 .bear_card_lines {
+    color: rgba(225,232,225,.74);
+    font-size: 15px;
+    line-height: 1.85;
+}
+
+#bear_music_wrap_v13 .bear_line {
+    margin: 2px 0;
+}
+
+
+/* 角色头像：固定在原卡片右侧的小空白处，不参与文字排版，不改变原卡片尺寸 */
+#bear_music_wrap_v13 .bear_character_card {
+    position: relative;
+}
+
+#bear_music_wrap_v13 .bear_character_photo {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 52px;
+    height: 52px;
+    border-radius: 11px;
+    object-fit: cover;
+    object-position: center;
+    border: 1px solid rgba(205,225,209,.18);
+    box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    opacity: .94;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#bear_music_wrap_v13 .bear_character_photo_fallback {
+    display: none;
+}
+
+#bear_music_wrap_v13 .bear_text {
+    color: rgba(225,232,225,.74);
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+#bear_music_wrap_v13 .bear_player {
+    padding: 19px 20px 17px;
+    margin-bottom: 20px;
+    border-radius: 21px;
+    border: 1px solid rgba(194,218,199,.12);
+    background: rgba(65,83,71,.38);
+}
+
+#bear_music_wrap_v13 .bear_now {
+    min-height: 20px;
+    color: rgba(227,235,228,.83);
+    font-size: 15px;
+}
+
+#bear_music_wrap_v13 .bear_sub {
+    margin-bottom: 14px;
+}
+
+#bear_music_wrap_v13 .bear_controls {
+    gap: 25px;
+    margin: 5px 0 15px;
+}
+
+#bear_music_wrap_v13 .bear_btn {
+    width: 51px;
+    height: 51px;
+    border-radius: 15px;
+    background: rgba(45,61,50,.45);
+}
+
+#bear_music_wrap_v13 .bear_btn.play {
+    width: 58px;
+    height: 58px;
+}
+
+#bear_music_wrap_v13 .bear_progress_wrap {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+#bear_music_wrap_v13 .bear_time_left,
+#bear_music_wrap_v13 .bear_time_right {
+    width: 33px;
+    flex: 0 0 33px;
+    color: rgba(210,222,211,.38);
+    font-size: 10px;
+    text-align: center;
+}
+
+#bear_music_wrap_v13 .bear_progress {
+    flex: 1;
+    width: auto;
+}
+
+#bear_music_wrap_v13 .bear_track {
+    min-height: 62px;
+    margin-bottom: 9px;
+    padding: 0 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(194,219,200,.09);
+    background: rgba(65,83,71,.26);
+}
+
+#bear_music_wrap_v13 .bear_track_name {
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .bear_panel {
+        width: calc(100vw - 26px);
+        height: min(860px, calc(100vh - 76px));
+        border-radius: 30px;
+    }
+
+    #bear_music_wrap_v13 .bear_tabs {
+        margin: 0 34px;
+        padding-top: 25px;
+    }
+
+    #bear_music_wrap_v13 .bear_tab {
+        font-size: 16px;
+    }
+
+    #bear_music_wrap_v13 .bear_content {
+        padding: 28px 34px 42px;
+    }
+
+    #bear_music_wrap_v13 .bear_card {
+        padding: 22px 23px 23px;
+        border-radius: 21px;
+    }
+}
+
+
+/* ===== v14 修补：手机面板比例 + 抵消全局 Uiverse button 样式 =====
+   只作用于小熊播放器，不修改酒馆其它 UI。
+*/
+#bear_music_wrap_v13 .bear_panel {
+    width: 85vw !important;
+    height: 58vh !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+/* 酒馆全局美化里有：
+   button { background: ... !important; color: ... !important;
+            border: ... !important; border-radius: 999px !important; ... }
+   因此这里必须使用同等优先级的 !important，并且限定在播放器内部。
+*/
+#bear_music_wrap_v13 .bear_tab,
+#bear_music_wrap_v13 .bear_btn,
+#bear_music_wrap_v13 .bear_track,
+#bear_music_wrap_v13 .bear_close {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    text-transform: none !important;
+}
+
+/* 顶部五个栏目：恢复原本的透明文字导航，不再变成白色 pill */
+#bear_music_wrap_v13 .bear_tab {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    color: rgba(215,226,217,.45) !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    padding: 0 2px 16px !important;
+}
+
+#bear_music_wrap_v13 .bear_tab.active {
+    background: transparent !important;
+    background-image: none !important;
+    color: rgba(230,239,231,.92) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+#bear_music_wrap_v13 .bear_tab:hover,
+#bear_music_wrap_v13 .bear_tab:active,
+#bear_music_wrap_v13 .bear_tab:focus {
+    background: transparent !important;
+    background-image: none !important;
+    color: rgba(230,239,231,.92) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* 播放器三个控制按钮：保持原来的深绿色，而不是全局白色 pill */
+#bear_music_wrap_v13 .bear_btn {
+    border: 1px solid rgba(194,219,200,.15) !important;
+    border-radius: 15px !important;
+    background: rgba(45,61,50,.45) !important;
+    background-image: none !important;
+    color: #d5af7f !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#bear_music_wrap_v13 .bear_btn.play {
+    border-radius: 50% !important;
+    background: rgba(93,121,101,.60) !important;
+    background-image: none !important;
+}
+
+#bear_music_wrap_v13 .bear_btn:hover,
+#bear_music_wrap_v13 .bear_btn:active,
+#bear_music_wrap_v13 .bear_btn:focus {
+    background: rgba(45,61,50,.55) !important;
+    background-image: none !important;
+    color: #d5af7f !important;
+    border-color: rgba(194,219,200,.20) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#bear_music_wrap_v13 .bear_btn.play:hover,
+#bear_music_wrap_v13 .bear_btn.play:active,
+#bear_music_wrap_v13 .bear_btn.play:focus {
+    background: rgba(93,121,101,.68) !important;
+    background-image: none !important;
+}
+
+/* 音乐列表也是 button，必须单独压掉全局白色按钮样式 */
+#bear_music_wrap_v13 .bear_track {
+    border: 1px solid rgba(194,219,200,.09) !important;
+    border-radius: 16px !important;
+    background: rgba(65,83,71,.26) !important;
+    background-image: none !important;
+    color: rgba(219,228,220,.66) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#bear_music_wrap_v13 .bear_track.active {
+    background: rgba(135,166,143,.13) !important;
+    background-image: none !important;
+    border-color: rgba(169,205,176,.16) !important;
+    color: rgba(229,238,230,.92) !important;
+}
+
+#bear_music_wrap_v13 .bear_track:hover,
+#bear_music_wrap_v13 .bear_track:active,
+#bear_music_wrap_v13 .bear_track:focus {
+    background: rgba(75,96,81,.34) !important;
+    background-image: none !important;
+    border-color: rgba(169,205,176,.16) !important;
+    color: rgba(229,238,230,.92) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* 关闭按钮也不接受全局 pill */
+#bear_music_wrap_v13 .bear_close {
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(0,0,0,.10) !important;
+    background-image: none !important;
+    color: rgba(225,235,227,.62) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#bear_music_wrap_v13 .bear_close:hover,
+#bear_music_wrap_v13 .bear_close:active,
+#bear_music_wrap_v13 .bear_close:focus {
+    background: rgba(0,0,0,.18) !important;
+    background-image: none !important;
+    color: rgba(235,242,236,.85) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* 防止全局 button:hover 的位移动画污染播放器 */
+#bear_music_wrap_v13 button:hover,
+#bear_music_wrap_v13 button:active {
+    transform: none !important;
+}
+
+
+
+/* =========================================================
+   小型悬浮播放器：按参考图比例固定，不随四季卡内容撑大
+   ========================================================= */
+#bear_music_wrap_v13 .bear_panel {
+    width: 85vw !important;
+    height: 58vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+}
+
+#bear_music_wrap_v13 .bear_tabs {
+    margin-left: 22px !important;
+    margin-right: 22px !important;
+    padding-top: 18px !important;
+}
+
+#bear_music_wrap_v13 .bear_tab {
+    font-size: 15px !important;
+    padding: 0 1px 11px !important;
+}
+
+#bear_music_wrap_v13 .bear_content {
+    padding: 16px 22px 22px !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+}
+
+@media (min-width: 601px) {
+    #bear_music_wrap_v13 .bear_panel {
+        width: min(520px, 85vw) !important;
+        height: min(680px, 58vh) !important;
+    }
+}
+
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .bear_panel {
+        width: 85vw !important;
+        height: 58vh !important;
+        border-radius: 24px !important;
+    }
+    #bear_music_wrap_v13 .bear_tabs {
+        margin: 0 22px !important;
+        padding-top: 18px !important;
+    }
+    #bear_music_wrap_v13 .bear_tab {
+        font-size: 15px !important;
+        padding-bottom: 11px !important;
+    }
+    #bear_music_wrap_v13 .bear_content {
+        padding: 16px 22px 22px !important;
+    }
+}
+
+
+
+
+
+/* =========================================================
+   云樾公馆 · 三维建筑线稿 / 楼层交互
+   仅作用于“地点”栏目中的云樾公馆模块
+   ========================================================= */
+#bear_music_wrap_v13 .bear_villa_card {
+    position: relative;
+    padding: 17px 16px 15px;
+    margin-bottom: 12px;
+    border-radius: 22px;
+    border: 1px solid rgba(194,218,199,.12);
+    background: rgba(65,83,71,.34);
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.018), 0 4px 16px rgba(0,0,0,.08);
+}
+#bear_music_wrap_v13 .bear_villa_head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+#bear_music_wrap_v13 .bear_villa_title {
+    min-width: 0;
+    color: rgba(205,224,208,.88);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .015em;
+}
+#bear_music_wrap_v13 .bear_villa_sub {
+    margin-top: 4px;
+    color: rgba(187,208,191,.42);
+    font-size: 9px;
+    letter-spacing: .08em;
+}
+#bear_music_wrap_v13 .bear_villa_tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 5px;
+    flex: 0 0 auto;
+}
+#bear_music_wrap_v13 .bear_villa_tag {
+    padding: 4px 7px;
+    border: 1px solid rgba(191,217,197,.10);
+    border-radius: 8px;
+    color: rgba(194,216,198,.52);
+    background: rgba(143,171,149,.07);
+    font-size: 9px;
+    line-height: 1;
+}
+#bear_music_wrap_v13 .bear_villa_hint {
+    margin: 9px 0 1px;
+    color: rgba(205,220,207,.34);
+    font-size: 9px;
+    letter-spacing: .03em;
+}
+#bear_music_wrap_v13 .bear_villa_stage {
+    position: relative;
+    width: 100%;
+    margin: 1px auto 2px;
+    min-height: 258px;
+    border-radius: 18px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 38%, rgba(155,190,163,.08), transparent 42%),
+        linear-gradient(180deg, rgba(40,59,48,.18), rgba(22,35,29,.10));
+}
+#bear_music_wrap_v13 .bear_villa_stage::before {
+    content: "";
+    position: absolute;
+    left: 9%;
+    right: 9%;
+    bottom: 25px;
+    height: 1px;
+    background: rgba(191,216,197,.12);
+    box-shadow: 0 7px 0 rgba(191,216,197,.045);
+}
+#bear_music_wrap_v13 .bear_villa_svg {
+    display: block;
+    width: 100%;
+    height: 258px;
+    overflow: visible;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-line {
+    fill: rgba(48,67,55,.34);
+    stroke: rgba(181,209,187,.46);
+    stroke-width: 1.15;
+    vector-effect: non-scaling-stroke;
+    transition: fill .25s ease, stroke .25s ease, opacity .25s ease, filter .25s ease, transform .28s cubic-bezier(.16,1,.3,1);
+    transform-box: fill-box;
+    transform-origin: center;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-detail {
+    fill: none;
+    stroke: rgba(185,211,190,.26);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-window {
+    fill: rgba(164,198,171,.10);
+    stroke: rgba(192,216,197,.34);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transition: fill .25s ease, stroke .25s ease;
+    pointer-events: none;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-wood {
+    fill: rgba(116,88,63,.16);
+    stroke: rgba(194,164,128,.30);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transition: fill .25s ease, stroke .25s ease, opacity .25s ease;
+    pointer-events: none;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-wood-line {
+    fill: none;
+    stroke: rgba(197,169,135,.28);
+    stroke-width: .9;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-terrace {
+    fill: rgba(91,113,96,.13);
+    stroke: rgba(186,213,191,.31);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    transition: fill .25s ease, stroke .25s ease;
+    pointer-events: none;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor.active .villa-wood {
+    fill: rgba(128,96,68,.27);
+    stroke: rgba(207,180,145,.56);
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor.active .villa-wood-line {
+    stroke: rgba(215,187,150,.52);
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor.active .villa-terrace {
+    fill: rgba(118,151,126,.22);
+    stroke: rgba(202,228,208,.62);
+}
+
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor:not(.active) {
+    opacity: .78;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor.active .villa-line {
+    fill: rgba(112,151,121,.25);
+    stroke: rgba(186,224,193,.92);
+    filter: drop-shadow(0 0 5px rgba(150,207,162,.22));
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor.active .villa-window {
+    fill: rgba(170,216,180,.17);
+    stroke: rgba(206,231,210,.68);
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor.active .villa-detail {
+    stroke: rgba(202,225,207,.48);
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-floor:active .villa-line {
+    transform: translateY(-2px);
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-roof {
+    fill: rgba(52,72,59,.34);
+    stroke: rgba(187,213,192,.56);
+    stroke-width: 1.25;
+    vector-effect: non-scaling-stroke;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-yard {
+    cursor: pointer;
+    fill: rgba(93,123,99,.09);
+    stroke: rgba(174,204,180,.27);
+    stroke-width: 1.15;
+    vector-effect: non-scaling-stroke;
+    transition: fill .25s ease, stroke .25s ease, filter .25s ease;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-yard.active {
+    fill: rgba(113,158,121,.24);
+    stroke: rgba(188,224,194,.85);
+    filter: drop-shadow(0 0 5px rgba(150,207,162,.18));
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-label {
+    fill: rgba(218,232,220,.58);
+    font-size: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: .08em;
+    pointer-events: none;
+    text-anchor: middle;
+}
+#bear_music_wrap_v13 .bear_villa_svg .villa-label-small {
+    fill: rgba(205,224,208,.35);
+    font-size: 7px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: .08em;
+    pointer-events: none;
+    text-anchor: middle;
+}
+#bear_music_wrap_v13 .bear_villa_selector {
+    display: flex;
+    gap: 6px;
+    margin: 1px 1px 11px;
+}
+#bear_music_wrap_v13 .bear_villa_selector button {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    flex: 1;
+    min-width: 0;
+    height: 31px;
+    padding: 0 5px;
+    border: 1px solid rgba(194,219,200,.10) !important;
+    border-radius: 9px !important;
+    background: rgba(45,61,50,.22) !important;
+    color: rgba(202,220,205,.48) !important;
+    box-shadow: none !important;
+    font-size: 10px;
+    line-height: 31px;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+}
+#bear_music_wrap_v13 .bear_villa_selector button.active {
+    border-color: rgba(174,210,181,.24) !important;
+    background: rgba(105,143,112,.22) !important;
+    color: rgba(224,236,225,.84) !important;
+}
+#bear_music_wrap_v13 .bear_villa_selector button:active {
+    transform: scale(.97);
+}
+#bear_music_wrap_v13 .bear_villa_detail {
+    min-height: 76px;
+    padding: 12px 13px 11px;
+    border-radius: 14px;
+    border: 1px solid rgba(193,219,199,.09);
+    background: rgba(26,43,34,.23);
+    transition: opacity .2s ease, background .2s ease, border-color .2s ease;
+}
+#bear_music_wrap_v13 .bear_villa_detail_head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 7px;
+}
+#bear_music_wrap_v13 .bear_villa_detail_floor {
+    color: rgba(204,226,207,.82);
+    font-size: 12px;
+    font-weight: 600;
+}
+#bear_music_wrap_v13 .bear_villa_detail_hint {
+    color: rgba(183,207,188,.35);
+    font-size: 8px;
+    letter-spacing: .08em;
+}
+#bear_music_wrap_v13 .bear_villa_detail_items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 7px;
+}
+#bear_music_wrap_v13 .bear_villa_detail_item {
+    position: relative;
+    padding-left: 10px;
+    color: rgba(214,228,216,.60);
+    font-size: 10px;
+    line-height: 1.45;
+}
+#bear_music_wrap_v13 .bear_villa_detail_item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .55em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(162,201,171,.52);
+    box-shadow: 0 0 5px rgba(162,201,171,.20);
+}
+#bear_music_wrap_v13 .bear_villa_empty {
+    color: rgba(205,220,207,.40);
+    font-size: 10px;
+}
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .bear_villa_card {
+        padding: 15px 13px 13px;
+        border-radius: 20px;
+    }
+    #bear_music_wrap_v13 .bear_villa_title {
+        font-size: 15px;
+    }
+    #bear_music_wrap_v13 .bear_villa_stage,
+    #bear_music_wrap_v13 .bear_villa_svg {
+        height: 242px;
+    }
+    #bear_music_wrap_v13 .bear_villa_stage {
+        min-height: 242px;
+    }
+}
+
+
+
+/* =========================================================
+   南京地点搜索
+   独立于地图容器，固定放在“云樾公馆三维”与地图之间。
+   不再进入 Leaflet 地图层，因此不会被瓦片覆盖。
+   ========================================================= */
+#bear_music_wrap_v13 .bear_map_search {
+    position: relative !important;
+    z-index: 10000 !important;
+    isolation: isolate;
+    box-sizing: border-box !important;
+    width: 100%;
+    margin: 10px 0 12px !important;
+    padding: 0 !important;
+    pointer-events: auto;
+    align-self: flex-start !important;
+}
+
+#bear_music_wrap_v13 .bear_map_search_box {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+#bear_music_wrap_v13 .bear_map_search_input {
+    width: 100%;
+    height: 36px;
+    box-sizing: border-box;
+    padding: 0 35px 0 34px;
+    border: 1px solid rgba(62,84,69,.12) !important;
+    border-radius: 12px !important;
+    outline: none !important;
+    background: rgba(250,252,250,.94) !important;
+    color: #33473a !important;
+    box-shadow: 0 5px 18px rgba(29,45,37,.16) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 12px !important;
+    line-height: 36px;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+
+#bear_music_wrap_v13 .bear_map_search_input::placeholder {
+    color: #99a49b;
+}
+
+#bear_music_wrap_v13 .bear_map_search_icon {
+    position: absolute;
+    z-index: 2;
+    left: 11px;
+    top: 8px;
+    width: 20px;
+    height: 20px;
+    color: #708178;
+    font-size: 15px;
+    line-height: 20px;
+    text-align: center;
+    pointer-events: none;
+}
+
+#bear_music_wrap_v13 .bear_map_search_clear {
+    position: absolute;
+    z-index: 2;
+    right: 7px;
+    top: 5px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #89968d !important;
+    font-size: 16px;
+    line-height: 26px;
+    cursor: pointer;
+    box-shadow: none !important;
+}
+
+#bear_music_wrap_v13 .bear_map_search_results {
+    position: absolute;
+    z-index: 30;
+    top: 42px;
+    left: 0;
+    right: 0;
+    display: none;
+    overflow: hidden;
+    border: 1px solid rgba(62,84,69,.10);
+    border-radius: 12px;
+    background: rgba(250,252,250,.97);
+    box-shadow: 0 9px 25px rgba(29,45,37,.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+#bear_music_wrap_v13 .bear_map_search_results.show {
+    display: block;
+}
+
+#bear_music_wrap_v13 .bear_map_search_result {
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(62,84,69,.07) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #33473a !important;
+    text-align: left;
+    box-shadow: none !important;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+#bear_music_wrap_v13 .bear_map_search_result:last-child {
+    border-bottom: 0 !important;
+}
+
+#bear_music_wrap_v13 .bear_map_search_result:active,
+#bear_music_wrap_v13 .bear_map_search_result:hover {
+    background: rgba(117,145,124,.10) !important;
+}
+
+#bear_music_wrap_v13 .bear_map_search_result_name {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#bear_music_wrap_v13 .bear_map_search_result_group {
+    margin-top: 2px;
+    color: #8b978f;
+    font-size: 9px;
+}
+
+#bear_music_wrap_v13 .bear_map_search_empty {
+    padding: 12px;
+    color: #89958d;
+    font-size: 10px;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .bear_map_search {
+        margin-bottom: 9px;
+    }
+}
+
+
+
+/* =========================================================
+   南京互动地图
+   MapLibre GL + OpenFreeMap / OpenMapTiles
+   仅作用于“地点”栏目
+   ========================================================= */
+#bear_music_wrap_v13 .bear_location_card {
+    margin-bottom: 10px;
+}
+
+#bear_music_wrap_v13 .bear_nanjing_map_wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 285px;
+    margin: 0 0 12px;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(193,219,199,.13);
+    background: rgba(35,53,43,.62);
+    box-shadow: 0 4px 18px rgba(0,0,0,.10);
+}
+
+#bear_music_wrap_v13 .bear_nanjing_map {
+    width: 100%;
+    height: 100%;
+    background: #eef1ed;
+    overflow: hidden;
+}
+
+#bear_music_wrap_v13 .bear_nanjing_map .leaflet-tile {
+    image-rendering: auto;
+}
+
+#bear_music_wrap_v13 .bear_nanjing_map_loading {
+    position: absolute;
+    inset: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: rgba(235,242,236,.68);
+    font-size: 12px;
+    text-align: center;
+    background: rgba(29,45,37,.38);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    pointer-events: none;
+    transition: opacity .25s ease;
+}
+
+#bear_music_wrap_v13 .bear_nanjing_map_loading.hide {
+    opacity: 0;
+}
+
+/* Leaflet 控件稍微收敛，避免和播放器原本的绿色风格打架。 */
+#bear_music_wrap_v13 .leaflet-control-zoom {
+    border: 0 !important;
+    box-shadow: 0 3px 12px rgba(0,0,0,.18) !important;
+}
+
+#bear_music_wrap_v13 .leaflet-control-zoom a {
+    width: 29px !important;
+    height: 29px !important;
+    line-height: 29px !important;
+    color: #496151 !important;
+    background: rgba(247,250,247,.92) !important;
+    border: 0 !important;
+}
+
+#bear_music_wrap_v13 .leaflet-control-zoom a + a {
+    border-top: 1px solid rgba(73,97,81,.12) !important;
+}
+
+#bear_music_wrap_v13 .leaflet-control-attribution {
+    font-size: 8px !important;
+    line-height: 14px !important;
+    color: rgba(58,72,61,.72) !important;
+    background: rgba(247,250,247,.72) !important;
+    padding: 0 4px !important;
+}
+
+#bear_music_wrap_v13 .leaflet-control-attribution a {
+    color: #536b59 !important;
+}
+
+#bear_music_wrap_v13 .leaflet-marker-icon.bear_old_map_marker {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+#bear_music_wrap_v13 .bear_map_pin {
+    position: relative !important;
+    display: block !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% 50% 50% 0 !important;
+    border: 2px solid rgba(247,250,247,.94) !important;
+    background: #718f79 !important;
+    box-shadow: 0 3px 9px rgba(0,0,0,.28) !important;
+    transform: rotate(-45deg) !important;
+    transform-origin: 50% 50% !important;
+}
+
+#bear_music_wrap_v13 .bear_map_pin::after {
+    content: "";
+    position: absolute !important;
+    width: 6px !important;
+    height: 6px !important;
+    left: 6px !important;
+    top: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    border: 0 !important;
+    background: #f7faf7 !important;
+    box-shadow: none !important;
+}
+
+#bear_music_wrap_v13 .leaflet-popup-content-wrapper {
+    border-radius: 13px !important;
+    background: rgba(31,48,39,.96) !important;
+    color: rgba(236,243,237,.90) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,.25) !important;
+}
+
+#bear_music_wrap_v13 .leaflet-popup-tip-container {
+    width: 40px !important;
+    height: 20px !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 100% !important;
+    margin-left: -20px !important;
+    margin-top: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+#bear_music_wrap_v13 .leaflet-popup-tip {
+    width: 17px !important;
+    height: 17px !important;
+    padding: 1px !important;
+    margin: -10px auto 0 !important;
+    transform: rotate(45deg) !important;
+    background: rgba(31,48,39,.96) !important;
+    box-shadow: none !important;
+}
+
+#bear_music_wrap_v13 .leaflet-popup-content {
+    margin: 10px 12px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+}
+
+#bear_music_wrap_v13 .bear_map_popup_title {
+    margin-bottom: 3px;
+    color: rgba(226,239,228,.96);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#bear_music_wrap_v13 .bear_map_popup_group {
+    margin-bottom: 5px;
+    color: rgba(181,207,187,.58);
+    font-size: 9px;
+    letter-spacing: .2px;
+}
+
+#bear_music_wrap_v13 .bear_map_popup_desc {
+    max-width: 190px;
+    color: rgba(210,225,214,.76);
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .bear_nanjing_map_wrap {
+        height: 285px;
+    }
+}
+
+/* =========================================================
+   MapLibre GL 矢量地图覆盖样式
+   地标继续使用旧版固定钉；简介继续保持旧版连接方式。
+   ========================================================= */
+#bear_music_wrap_v13 .maplibregl-map {
+    width: 100% !important;
+    height: 100% !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+#bear_music_wrap_v13 .maplibregl-ctrl-group {
+    border: 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 3px 12px rgba(0,0,0,.18) !important;
+}
+#bear_music_wrap_v13 .maplibregl-ctrl-group button {
+    width: 34px !important;
+    height: 34px !important;
+    background: rgba(247,250,247,.92) !important;
+}
+#bear_music_wrap_v13 .maplibregl-ctrl-attrib {
+    font-size: 8px !important;
+    line-height: 14px !important;
+    color: rgba(58,72,61,.72) !important;
+    background: rgba(247,250,247,.72) !important;
+}
+#bear_music_wrap_v13 .maplibregl-ctrl-attrib a { color: #536b59 !important; }
+#bear_music_wrap_v13 .bear_map_marker_element {
+    width: 22px !important;
+    height: 22px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+#bear_music_wrap_v13 .bear_map_emoji {
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 23px !important;
+    line-height: 1 !important;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+    text-shadow: 0 2px 5px rgba(0,0,0,.28) !important;
+    filter: drop-shadow(0 1px 2px rgba(255,255,255,.45)) !important;
+    transform: translateY(-2px) !important;
+    pointer-events: none !important;
+}
+#bear_music_wrap_v13 .bear_map_popup_wrap {
+    min-width: 190px;
+    max-width: 220px;
+    position: relative;
+}
+#bear_music_wrap_v13 .maplibregl-popup {
+    z-index: 30 !important;
+}
+#bear_music_wrap_v13 .maplibregl-popup-content {
+    padding: 10px 12px !important;
+    border-radius: 13px !important;
+    background: rgba(31,48,39,.96) !important;
+    color: rgba(236,243,237,.90) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,.25) !important;
+}
+#bear_music_wrap_v13 .maplibregl-popup-tip {
+    border-top-color: rgba(31,48,39,.96) !important;
+    border-bottom-color: rgba(31,48,39,.96) !important;
+}
+#bear_music_wrap_v13 .maplibregl-popup-close-button {
+    top: 5px !important;
+    right: 7px !important;
+    width: 24px !important;
+    height: 24px !important;
+    color: rgba(220,235,222,.70) !important;
+    font-size: 22px !important;
+    line-height: 20px !important;
+    font-weight: 300 !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+#bear_music_wrap_v13 .maplibregl-popup-close-button:hover {
+    background: transparent !important;
+    color: rgba(240,248,241,.95) !important;
+}
+#bear_music_wrap_v13 .maplibregl-canvas { outline: none !important; }
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .maplibregl-popup-content { max-width: 220px !important; }
+}
+
+
+
+/* =========================================================
+   v50 最终细节：底部操作按钮统一为窄型 + 面板右侧原生滚动条
+   仅作用于小熊播放器，不影响酒馆其它 UI。
+   ========================================================= */
+
+/* 添加 / 按序：统一成同样窄的尺寸，左右真正对称。 */
+#bear_music_wrap_v13 .bear_music_action_row {
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 0 !important;
+}
+
+#bear_music_wrap_v13 .bear_music_action_row > .bear_music_add_row,
+#bear_music_wrap_v13 .bear_music_action_row > .bear_mode_btn {
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+}
+
+#bear_music_wrap_v13 .bear_music_add_row {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+}
+
+#bear_music_wrap_v13 .bear_music_add_btn,
+#bear_music_wrap_v13 .bear_mode_btn {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    height: 30px !important;
+    padding: 0 6px !important;
+    border-radius: 10px !important;
+    gap: 4px !important;
+    font-size: 10px !important;
+}
+
+/* 图标稍微收一点，避免“添加”视觉重量比“按序”大。 */
+#bear_music_wrap_v13 .bear_music_add_btn .bear_add_icon {
+    font-size: 13px !important;
+}
+
+#bear_music_wrap_v13 .bear_mode_btn .bear_mode_icon {
+    font-size: 11px !important;
+}
+
+/* ---------------------------------------------------------
+   右侧窄滚动条
+   .bear_content 本身就是实际滚动容器，所以滚动条会：
+   1. 随内容上下滑动
+   2. 到顶部/底部时分别到顶部/底部
+   3. 不产生额外占位卡片
+   --------------------------------------------------------- */
+#bear_music_wrap_v13 .bear_content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(171,204,179,.34) transparent !important;
+    scrollbar-gutter: stable !important;
+}
+
+/* Chromium / Android WebView */
+#bear_music_wrap_v13 .bear_content::-webkit-scrollbar {
+    display: block !important;
+    width: 4px !important;
+    height: 4px !important;
+}
+
+#bear_music_wrap_v13 .bear_content::-webkit-scrollbar-track {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+#bear_music_wrap_v13 .bear_content::-webkit-scrollbar-thumb {
+    background: rgba(171,204,179,.34) !important;
+    border-radius: 999px !important;
+    border: 0 !important;
+    box-shadow: 0 0 5px rgba(144,190,154,.08) !important;
+}
+
+#bear_music_wrap_v13 .bear_content::-webkit-scrollbar-thumb:hover,
+#bear_music_wrap_v13 .bear_content::-webkit-scrollbar-thumb:active {
+    background: rgba(180,211,187,.48) !important;
+}
+
+/* 底部留一点自然呼吸空间，让滚动条终点不会贴死歌曲卡片。 */
+#bear_music_wrap_v13 .bear_content {
+    padding-right: 17px !important;
+    padding-bottom: 24px !important;
+}
+
+@media (max-width: 600px) {
+    #bear_music_wrap_v13 .bear_content {
+        padding-right: 16px !important;
+        padding-bottom: 24px !important;
+    }
+}
