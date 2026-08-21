@@ -1,0 +1,12 @@
+{
+  "display_name": "小兔播放器",
+  "loading_order": 100,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "Aliya Lee",
+  "version": "1.0.3",
+  "homePage": "https://github.com/antelopean99-ship-it/music-player-aliya",
+  "auto_update": true
+}
